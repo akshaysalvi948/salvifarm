@@ -1,12 +1,10 @@
 import streamlit as st
 import urllib.parse
+import os
 
-# --- CONFIGURATION (EDIT THESE DETAILS) ---
-# 1. Paste your hosted logo image link here (Must end in .png or .jpg)
-LOGO_IMAGE_URL = "https://i.ibb.co/your-uploaded-image/Gemini-Generated-Image.png" 
-
-# 2. Enter your real WhatsApp Number (Format: Country code first, no spaces or +)
-MY_WHATSAPP_NUMBER = "917208974398"  
+# --- CONFIGURATION (EDIT YOUR WHATSAPP NUMBER) ---
+# Format: Country code first, no spaces, no '+' sign (e.g., 91 for India + your 10 digits)
+MY_WHATSAPP_NUMBER = "919876543210"  
 
 # --- APP PAGE SETUP ---
 st.set_page_config(page_title="The Salvi Farms", page_icon="🥭", layout="centered")
@@ -25,13 +23,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER (Displaying your Logo Image) ---
-try:
-    st.image(LOGO_IMAGE_URL, use_column_width=True)
-except:
-    # Fallback text if the image link is not configured yet
-    st.markdown("<h1 style='color: #2d5a27; text-align: center;'>THE SALVI FARMS</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #d4af37; text-align: center; font-style: italic;'>Pure Organic Alphonso Mangoes — From Tree to Home</p>", unsafe_allow_html=True)
+# --- HEADER (Loads logo.png from your local folder safely) ---
+IMAGE_FILENAME = "logo.png"
+
+if os.path.exists(IMAGE_FILENAME):
+    st.image(IMAGE_FILENAME, use_column_width=True)
+else:
+    # Beautiful text backup so your app never crashes or shows an error if the file is missing
+    st.markdown("<h1 style='color: #2d5a27; text-align: center; margin-bottom: 0;'>THE SALVI FARMS</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #d4af37; text-align: center; font-style: italic; margin-top: 0; font-size: 18px;'>Pure Organic Alphonso Mangoes — From Tree to Home</p>", unsafe_allow_html=True)
 
 # --- ORDER FORM ---
 st.write("---")
