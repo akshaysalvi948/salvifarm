@@ -1,7 +1,6 @@
 import streamlit as st
 import urllib.parse
 import os
-from streamlit_components_auth import html # Standard HTML injection wrapper if needed, or components
 
 # --- CONFIGURATION ---
 MY_WHATSAPP_NUMBER = "917208974398"  
@@ -53,7 +52,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- JAVASCRIPT GEOLOCATION BRIDGE ---
-# This script runs in the customer's browser, grabs coordinates, and fetches the address for free via OpenStreetMap API
+# Uses built-in components directly without needing any extra installations
 st.components.v1.html("""
 <script>
     function getLocation() {
@@ -68,18 +67,15 @@ st.components.v1.html("""
         var lat = position.coords.latitude;
         var lon = position.coords.longitude;
         
-        // Free open-source reverse geocoding API (Nominatim OpenStreetMap)
         var url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
         
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 if(data && data.display_name) {
-                    // Find Streamlit's textarea component on the page and fill it out
                     const textareas = window.parent.document.getElementsByTagName('textarea');
                     if (textareas.length > 0) {
                         textareas[0].value = data.display_name;
-                        // Trigger a small input event so Streamlit registers the changes
                         textareas[0].dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }
@@ -142,8 +138,6 @@ with st.form("luxury_order_form", clear_on_submit=False):
         phone = st.text_input("WhatsApp Number", placeholder="e.g. 9876543210")
         
     quantity = st.selectbox("Select Quantity (Number of Dozens)", [1, 2, 3, 5, 10, 20])
-    
-    # Textarea will receive the auto-detected location address string
     address = st.text_area("Delivery Drop Location", placeholder="Click the button above or type your complete address here...")
     
     submitted = st.form_submit_button("PLACE ORDER & SHARE")
