@@ -4,8 +4,8 @@ import smtplib
 from email.mime.text import MIMEText
 
 # --- CONFIGURATION (EDIT THESE DETAILS) ---
-MY_WHATSAPP_NUMBER = "919876543210"  # Replace with your number (Country code first, no +)
-MY_EMAIL = "your-email@gmail.com"     # Replace with your Gmail
+MY_WHATSAPP_NUMBER = "917208974398"  # Replace with your number (Country code first, no +)
+MY_EMAIL = "akshaysalvi948@gmail.com"     # Replace with your Gmail
 EMAIL_PASSWORD = "your-app-password"  # Replace with your Gmail App Password
 
 # --- APP PAGE SETUP ---
