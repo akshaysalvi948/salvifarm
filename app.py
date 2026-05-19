@@ -1,41 +1,45 @@
 import streamlit as st
 import urllib.parse
-import smtplib
-from email.mime.text import MIMEText
 
 # --- CONFIGURATION (EDIT THESE DETAILS) ---
-MY_WHATSAPP_NUMBER = "917208974398"  # Replace with your number (Country code first, no +)
-MY_EMAIL = "akshaysalvi948@gmail.com"     # Replace with your Gmail
-EMAIL_PASSWORD = "your-app-password"  # Replace with your Gmail App Password
+# 1. Paste your hosted logo image link here (Must end in .png or .jpg)
+LOGO_IMAGE_URL = "https://i.ibb.co/your-uploaded-image/Gemini-Generated-Image.png" 
+
+# 2. Enter your real WhatsApp Number (Format: Country code first, no spaces or +)
+MY_WHATSAPP_NUMBER = "917208974398"  
 
 # --- APP PAGE SETUP ---
 st.set_page_config(page_title="The Salvi Farms", page_icon="🥭", layout="centered")
 
-# Custom Styling for Forest Green and Gold theme
+# Premium Custom Styling matching the Forest Green and Cream aesthetic
 st.markdown("""
     <style>
     .main { background-color: #fbf9f4; }
-    h1 { color: #2d5a27; text-align: center; font-family: 'Georgia', serif; }
-    .subtitle { color: #d4af37; text-align: center; font-style: italic; margin-bottom: 30px; font-size: 18px; }
     div.stButton > button:first-child {
         background-color: #2d5a27; color: white; border-radius: 8px;
         width: 100%; font-size: 18px; font-weight: bold; height: 50px;
         border: 2px solid #d4af37;
     }
     div.stButton > button:first-child:hover { background-color: #1e3d1a; color: white; }
+    .footer { text-align: center; font-size: 12px; color: #777; margin-top: 30px; font-style: italic; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- HEADER ---
-st.markdown("<h1>THE SALVI FARMS</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Pure Organic Alphonso Mangoes — From Tree to Home</p>", unsafe_allow_html=True)
+# --- HEADER (Displaying your Logo Image) ---
+try:
+    st.image(LOGO_IMAGE_URL, use_column_width=True)
+except:
+    # Fallback text if the image link is not configured yet
+    st.markdown("<h1 style='color: #2d5a27; text-align: center;'>THE SALVI FARMS</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #d4af37; text-align: center; font-style: italic;'>Pure Organic Alphonso Mangoes — From Tree to Home</p>", unsafe_allow_html=True)
 
 # --- ORDER FORM ---
+st.write("---")
 with st.form("order_form", clear_on_submit=False):
-    st.subheader("Place Your Alphonso Order")
+    st.subheader("🛒 Place Your Alphonso Order")
     
-    name = st.text_input("Your Full Name *")
-    phone = st.text_input("WhatsApp Number *")
+    name = st.text_input("Your Full Name *", placeholder="Enter your name")
+    phone = st.text_input("Your Contact/WhatsApp Number *", placeholder="e.g., 9876543210")
     
     mango_type = st.selectbox("Select Mango Box Type *", [
         "Premium Devgad Alphonso (1 Dozen)",
@@ -44,16 +48,16 @@ with st.form("order_form", clear_on_submit=False):
     ])
     
     quantity = st.selectbox("Quantity (Number of Boxes) *", [1, 2, 3, 5, 10])
-    address = st.text_area("Complete Delivery Address *")
+    address = st.text_area("Complete Delivery Address *", placeholder="Enter your complete home or office delivery address")
     
-    submitted = st.form_submit_button("🚀 Submit Order via WhatsApp & Email")
+    submitted = st.form_submit_button("Generate WhatsApp Order")
 
-# --- FORM SUBMISSION LOGIC ---
+# --- FORM SUBMISSION PROCESSING ---
 if submitted:
     if not name or not phone or not address:
-        st.error("Please fill out all required fields.")
+        st.error("⚠️ Please fill out all required fields before submitting.")
     else:
-        # 1. Format the Order Message
+        # Build the beautifully formatted structured WhatsApp text message block
         order_details = (
             f"*NEW MANGO ORDER - THE SALVI FARMS*\n\n"
             f"*Customer Name:* {name}\n"
@@ -63,34 +67,19 @@ if submitted:
             f"*Delivery Address:* {address}"
         )
         
-        # 2. Free Email Notification Sender (Backend Process)
-        try:
-            msg = MIMEText(order_details.replace('*', '')) # Remove asterisks for clean email text
-            msg['Subject'] = f"New Mango Order from {name}"
-            msg['From'] = MY_EMAIL
-            msg['To'] = MY_EMAIL
-            
-            # Connect to Gmail SMTP
-            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-            server.login(MY_EMAIL, EMAIL_PASSWORD)
-            server.sendmail(MY_EMAIL, [MY_EMAIL], msg.as_string())
-            server.quit()
-            st.success("✅ Order email logged successfully!")
-        except Exception as e:
-            # If email configuration isn't completed yet, let them proceed to WhatsApp
-            st.warning("Order processing... Proceed to WhatsApp link below.")
-
-        # 3. Create Free WhatsApp Link Generator
+        # Create Free Interactive WhatsApp Link Generator
         encoded_message = urllib.parse.quote(order_details)
         whatsapp_url = f"https://wa.me/{MY_WHATSAPP_NUMBER}?text={encoded_message}"
         
-        # Provide a prominent click link to open WhatsApp
+        # Display the big green button for the customer to tap and send to you
         st.markdown(f"""
             <a href="{whatsapp_url}" target="_blank">
                 <div style="background-color: #25D366; color: white; text-align: center; 
-                padding: 15px; border-radius: 8px; font-weight: bold; font-size: 18px; 
-                margin-top: 15px; text-decoration: none; border: 1px solid #128C7E;">
-                    💬 Click Here to Confirm Order on WhatsApp
+                padding: 16px; border-radius: 8px; font-weight: bold; font-size: 18px; 
+                margin-top: 15px; text-decoration: none; border: 1px solid #128C7E; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    💬 Click Here to Share Order on WhatsApp
                 </div>
             </a>
         """, unsafe_allow_html=True)
+
+st.markdown("<p class='footer'>The Salvi Farms © 2026 | Pure Organic Harvest</p>", unsafe_allow_html=True)
