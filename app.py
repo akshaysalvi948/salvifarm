@@ -114,4 +114,67 @@ with st.form("luxury_order_form", clear_on_submit=False):
                         }
                     }
                 })
-                .catch(err => alert("Error fetching address
+                .catch(err => alert("Error fetching address details. Please type manually."));
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("Location permission denied. Please type your address manually.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("Location request timed out.");
+                    break;
+            }
+        }
+    </script>
+    <button type="button" onclick="getLocation()" style="
+        background-color: #bfa15f; color: white; border: none; 
+        padding: 10px 16px; border-radius: 12px; font-weight: bold; 
+        cursor: pointer; width: 100%; font-size: 14px; box-shadow: 0 4px 10px rgba(191,161,95,0.25);
+        font-family: sans-serif; transition: background 0.2s;">
+        📍 Auto-Detect My Current Location
+    </button>
+    """, height=48)
+    
+    # Textarea right below the button
+    address = st.text_area("Delivery Drop Location", placeholder="Click the button above to auto-fill or type your complete address here...")
+    
+    submitted = st.form_submit_button("PLACE ORDER & SHARE")
+
+# --- TRENDING WHATSAPP REDIRECTION TRIGGER ---
+if submitted:
+    if not name or not phone or not address:
+        st.error("⚠️ Please fill out all required details to finalize your request.")
+    else:
+        order_details = (
+            f"📦 *THE SALVI FARMS — NEW MANGO ORDER*\n"
+            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+            f"👤 *Client Name:* {name}\n"
+            f"📱 *WhatsApp:* {phone}\n\n"
+            f"🥭 *Item Selected:* {PRODUCT_NAME}\n"
+            f"🔢 *Total Quantity:* {quantity} Dozen(s)\n\n"
+            f"📍 *Delivery Location:*\n{address}\n"
+            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+            f"✨ _Order submitted via Instant Store App_"
+        )
+        
+        encoded_message = urllib.parse.quote(order_details)
+        whatsapp_url = f"https://wa.me/{MY_WHATSAPP_NUMBER}?text={encoded_message}"
+        
+        st.markdown(f"""
+            <a href="{whatsapp_url}" target="_blank" style="text-decoration: none;">
+                <div style="background: linear-gradient(135deg, #25D366 0%, #1cbd55 100%); 
+                color: white; text-align: center; padding: 16px; border-radius: 14px; 
+                font-weight: 600; font-size: 18px; margin-top: 20px;
+                box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); transition: transform 0.2s;">
+                    💬 Launch WhatsApp to Confirm Order Delivery
+                </div>
+            </a>
+        """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div class='footer'>THE SALVI FARMS • EST. 2026 • ORGANIC LUXURY</div>", unsafe_allow_html=True)
