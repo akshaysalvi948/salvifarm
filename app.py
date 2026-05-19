@@ -51,60 +51,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- JAVASCRIPT GEOLOCATION BRIDGE ---
-# Uses built-in components directly without needing any extra installations
-st.components.v1.html("""
-<script>
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-    }
-
-    function showPosition(position) {
-        var lat = position.coords.latitude;
-        var lon = position.coords.longitude;
-        
-        var url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if(data && data.display_name) {
-                    const textareas = window.parent.document.getElementsByTagName('textarea');
-                    if (textareas.length > 0) {
-                        textareas[0].value = data.display_name;
-                        textareas[0].dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                }
-            })
-            .catch(err => alert("Error fetching address details. Please type manually."));
-    }
-
-    function showError(error) {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                alert("Location permission denied. Please type your address manually.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information unavailable.");
-                break;
-            case error.TIMEOUT:
-                alert("Location request timed out.");
-                break;
-        }
-    }
-</script>
-<button onclick="getLocation()" style="
-    background-color: #bfa15f; color: white; border: none; 
-    padding: 10px 16px; border-radius: 10px; font-weight: bold; 
-    cursor: pointer; width: 100%; font-size: 14px; box-shadow: 0 4px 10px rgba(191,161,95,0.25);">
-    📍 Auto-Detect My Current Location
-</button>
-""", height=45)
-
 # --- APP LAYOUT CONTAINER ---
 st.markdown('<div class="app-card">', unsafe_allow_html=True)
 
@@ -138,40 +84,34 @@ with st.form("luxury_order_form", clear_on_submit=False):
         phone = st.text_input("WhatsApp Number", placeholder="e.g. 9876543210")
         
     quantity = st.selectbox("Select Quantity (Number of Dozens)", [1, 2, 3, 5, 10, 20])
-    address = st.text_area("Delivery Drop Location", placeholder="Click the button above or type your complete address here...")
     
-    submitted = st.form_submit_button("PLACE ORDER & SHARE")
+    # --- GEOLOCATION BUTTON (Embedded cleanly inside the form hierarchy) ---
+    st.markdown("<label style='color: #1e3d1a; font-weight: 500; font-size: 14px; margin-bottom: 5px; display: block;'>Delivery Address Setup</label>", unsafe_allow_html=True)
+    st.components.v1.html("""
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
 
-# --- TRENDING WHATSAPP REDIRECTION TRIGGER ---
-if submitted:
-    if not name or not phone or not address:
-        st.error("⚠️ Please fill out all required details to finalize your request.")
-    else:
-        order_details = (
-            f"📦 *THE SALVI FARMS — NEW MANGO ORDER*\n"
-            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
-            f"👤 *Client Name:* {name}\n"
-            f"📱 *WhatsApp:* {phone}\n\n"
-            f"🥭 *Item Selected:* {PRODUCT_NAME}\n"
-            f"🔢 *Total Quantity:* {quantity} Dozen(s)\n\n"
-            f"📍 *Delivery Location:*\n{address}\n"
-            f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
-            f"✨ _Order submitted via Instant Store App_"
-        )
-        
-        encoded_message = urllib.parse.quote(order_details)
-        whatsapp_url = f"https://wa.me/{MY_WHATSAPP_NUMBER}?text={encoded_message}"
-        
-        st.markdown(f"""
-            <a href="{whatsapp_url}" target="_blank" style="text-decoration: none;">
-                <div style="background: linear-gradient(135deg, #25D366 0%, #1cbd55 100%); 
-                color: white; text-align: center; padding: 16px; border-radius: 14px; 
-                font-weight: 600; font-size: 18px; margin-top: 20px;
-                box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); transition: transform 0.2s;">
-                    💬 Launch WhatsApp to Confirm Order Delivery
-                </div>
-            </a>
-        """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown("<div class='footer'>THE SALVI FARMS • EST. 2026 • ORGANIC LUXURY</div>", unsafe_allow_html=True)
+        function showPosition(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            
+            var url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if(data && data.display_name) {
+                        const textareas = window.parent.document.getElementsByTagName('textarea');
+                        if (textareas.length > 0) {
+                            textareas[0].value = data.display_name;
+                            textareas[0].dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }
+                })
+                .catch(err => alert("Error fetching address
