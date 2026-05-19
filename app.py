@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- HEADER (Loads logo.png from your local folder safely) ---
-IMAGE_FILENAME = "logo.png"
+IMAGE_FILENAME = "img.png"
 
 if os.path.exists(IMAGE_FILENAME):
     st.image(IMAGE_FILENAME, use_column_width=True)
