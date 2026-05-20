@@ -79,14 +79,17 @@ with st.form("luxury_order_form", clear_on_submit=False):
     
     col1, col2 = st.columns(2)
     with col1:
-        name = st.text_input("Your Full Name", placeholder="e.g. Rahul Salvi")
+        name = st.text_input("Your Full Name *", placeholder="e.g. Rahul Salvi")
     with col2:
-        phone = st.text_input("WhatsApp Number", placeholder="e.g. 9876543210")
+        phone = st.text_input("WhatsApp Number *", placeholder="e.g. 9876543210")
         
-    quantity = st.selectbox("Select Quantity (Number of Dozens)", [1, 2, 3, 5, 10, 20])
+    quantity = st.selectbox("Select Quantity (Number of Dozens) *", [1, 2, 3, 5, 10, 20])
     
-    # --- GEOLOCATION BUTTON (Embedded cleanly inside the form hierarchy) ---
-    st.markdown("<label style='color: #1e3d1a; font-weight: 500; font-size: 14px; margin-bottom: 5px; display: block;'>Delivery Address Setup</label>", unsafe_allow_html=True)
+    st.write("---")
+    st.markdown("<h4 style='color: #1e3d1a; font-size: 16px; margin-bottom: 2px;'>📍 Shipping Address Details</h4>", unsafe_allow_html=True)
+    
+    # --- JAVASCRIPT GEOLOCATION BRIDGE ---
+    # Targets the first text input box (Detected Area) dynamically upon click
     st.components.v1.html("""
     <script>
         function getLocation() {
@@ -107,20 +110,23 @@ with st.form("luxury_order_form", clear_on_submit=False):
                 .then(response => response.json())
                 .then(data => {
                     if(data && data.display_name) {
-                        const textareas = window.parent.document.getElementsByTagName('textarea');
-                        if (textareas.length > 0) {
-                            textareas[0].value = data.display_name;
-                            textareas[0].dispatchEvent(new Event('input', { bubbles: true }));
+                        const inputs = window.parent.document.getElementsByTagName('input');
+                        for (let idx = 0; idx < inputs.length; idx++) {
+                            if (inputs[idx].placeholder.includes("Click button to locate")) {
+                                inputs[idx].value = data.display_name;
+                                inputs[idx].dispatchEvent(new Event('input', { bubbles: true }));
+                                break;
+                            }
                         }
                     }
                 })
-                .catch(err => alert("Error fetching address details. Please type manually."));
+                .catch(err => alert("Error fetching location details. Please type manually."));
         }
 
         function showError(error) {
             switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    alert("Location permission denied. Please type your address manually.");
+                    alert("Location permission denied. Please type your address fields manually.");
                     break;
                 case error.POSITION_UNAVAILABLE:
                     alert("Location information unavailable.");
@@ -135,21 +141,27 @@ with st.form("luxury_order_form", clear_on_submit=False):
         background-color: #bfa15f; color: white; border: none; 
         padding: 10px 16px; border-radius: 12px; font-weight: bold; 
         cursor: pointer; width: 100%; font-size: 14px; box-shadow: 0 4px 10px rgba(191,161,95,0.25);
-        font-family: sans-serif; transition: background 0.2s;">
-        📍 Auto-Detect My Current Location
+        font-family: sans-serif; margin-bottom: 5px;">
+        📍 Auto-Detect My Nearby Location / City
     </button>
-    """, height=48)
+    """, height=46)
     
-    # Textarea right below the button
-    address = st.text_area("Delivery Drop Location", placeholder="Click the button above to auto-fill or type your complete address here...")
+    # Auto-detected tracking row entry
+    gps_address = st.text_input("Detected Area / Region", placeholder="Click button to locate your general area...")
+    
+    # Exact Manual Address tab row entry
+    exact_address = st.text_area("Exact Flat/Room No., Building Name & Landmark *", placeholder="Type your room number, floor, wing, building name, road name, and landmarks...")
     
     submitted = st.form_submit_button("PLACE ORDER & SHARE")
 
 # --- TRENDING WHATSAPP REDIRECTION TRIGGER ---
 if submitted:
-    if not name or not phone or not address:
-        st.error("⚠️ Please fill out all required details to finalize your request.")
+    if not name or not phone or not exact_address:
+        st.error("⚠️ Please fill out all required fields (* Name, Phone, and Exact Address) before submitting.")
     else:
+        # Beautifully stitch the verified area with the custom handwritten unit direction details
+        full_shipping_destination = f"{exact_address}\n🗺️ Region Profile: {gps_address if gps_address else 'Entered Manually'}"
+        
         order_details = (
             f"📦 *THE SALVI FARMS — NEW MANGO ORDER*\n"
             f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
@@ -157,7 +169,7 @@ if submitted:
             f"📱 *WhatsApp:* {phone}\n\n"
             f"🥭 *Item Selected:* {PRODUCT_NAME}\n"
             f"🔢 *Total Quantity:* {quantity} Dozen(s)\n\n"
-            f"📍 *Delivery Location:*\n{address}\n"
+            f"📍 *Exact Parcel Destination:*\n{full_shipping_destination}\n"
             f"⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
             f"✨ _Order submitted via Instant Store App_"
         )
@@ -170,7 +182,7 @@ if submitted:
                 <div style="background: linear-gradient(135deg, #25D366 0%, #1cbd55 100%); 
                 color: white; text-align: center; padding: 16px; border-radius: 14px; 
                 font-weight: 600; font-size: 18px; margin-top: 20px;
-                box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); transition: transform 0.2s;">
+                box-shadow: 0 10px 25 rgba(37, 211, 102, 0.4); transition: transform 0.2s;">
                     💬 Launch WhatsApp to Confirm Order Delivery
                 </div>
             </a>
